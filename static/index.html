@@ -1,1 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>GitHub Webhook UI</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; }
+    .entry { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <h2>Latest GitHub Events</h2>
+  <div id="output"></div>
+
+  <script>
+  async function fetchEvents() {
+    const res = await fetch("/events/latest");
+    const data = await res.json();
+    const output = document.getElementById("output");
+    output.innerHTML = data.map(e => {
+      const date = new Date(e.timestamp).toLocaleString("en-US", { timeZone: "UTC" });
+      if (e.type === "push")
+        return `<div class='entry'>${e.author} pushed to "${e.to_branch}" on ${date} UTC</div>`;
+      if (e.type === "pull_request")
+        return `<div class='entry'>${e.author} submitted a pull request from "${e.from_branch}" to "${e.to_branch}" on ${date} UTC</div>`;
+      if (e.type === "merge")
+        return `<div class='entry'>${e.author} merged branch "${e.from_branch}" to "${e.to_branch}" on ${date} UTC</div>`;
+      return "";
+    }).join("");
+  }
+  fetchEvents();
+  setInterval(fetchEvents, 15000);
+  </script>
+</body>
+</html>
 
